@@ -124,11 +124,11 @@ class ImageProcessorApp(QWidget):
         self.layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.setLayout(self.layout)
-        self.setWindowTitle("Pildi protsessor")
+        self.setWindowTitle("Hinda raamatut kaane järgi")
         
     def show_dialog(self):
         # Hüpikakna kuvamine
-        QMessageBox.information(self, "Abi", "See on pildi töötlemise rakendus. Laadige pilt üles ja vajutage nuppu 'Ava pilt', et töötlemist alustada.")
+        QMessageBox.information(self, "Abi", "See tehisintellekt on õpetatud hindama inimesi nii, kuidas teised neid näeks.")
 
     def open_image(self):
         options = QFileDialog.Options()
