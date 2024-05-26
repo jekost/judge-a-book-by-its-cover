@@ -5,18 +5,18 @@ from PyQt5.QtCore import Qt, QPropertyAnimation
 from PyQt5.QtWidgets import QGraphicsDropShadowEffect
 from PyQt5.QtGui import QColor
 from PIL import Image
+import tensorflow as tf
+import numpy as np
 
-def process_image(image_path):
-    # Näidisprotsess funktsioon
-    # Tagastab kolm näidisteksti pildi töötlemise kohta
-    return (60,60,60)
 
 class ImageProcessorApp(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
+        
 
     def initUI(self):
+        self.model = self.load_model()
         self.layout = QVBoxLayout()
 
         self.layout.setSpacing(30)  # Vahe komponentide vahel
@@ -125,7 +125,36 @@ class ImageProcessorApp(QWidget):
 
         self.setLayout(self.layout)
         self.setWindowTitle("Hinda raamatut kaane järgi")
+
+    def load_model(self):
+        # Asendage see funktsioon vastavalt teie mudeli laadimisele
+        model = tf.keras.models.load_model('face_ratings_model.h5')
+        return model
+    
+    
+    def preprocess_image(self, image_path):
+        image = Image.open(image_path)
         
+        #image = image.crop(coords_for_crop(image_path))
+        image = image.resize((600, 600))  # Ensure the image is 600x600 pixels
+        image.show()
+        image = np.array(image) / 255.0  # Normalize the image
+        image = np.expand_dims(image, axis=0)  # Add batch dimension
+        return image
+
+    def ennusta(self, image_path):
+
+        # Preprocess the image
+        preprocessed_image = self.preprocess_image(image_path)
+        
+        # Predict the ratings
+        predicted_ratings = self.model.predict(preprocessed_image)
+
+        # Print the predicted ratings
+        return predicted_ratings[0]
+
+
+
     def show_dialog(self):
         # Hüpikakna kuvamine
         QMessageBox.information(self, "Abi", "See tehisintellekt on õpetatud hindama inimesi nii, kuidas teised neid näeks.")
@@ -143,7 +172,7 @@ class ImageProcessorApp(QWidget):
             self.image_label.setPixmap(pixmap)
 
 
-            vals = process_image(file_path)
+            vals = self.ennusta(file_path)
             
             self.button.setText("Vali uus pilt")
             
@@ -151,10 +180,9 @@ class ImageProcessorApp(QWidget):
             self.label2.setText("Ilu:")
             self.label3.setText("Usaldusväärsus:")
 
-            
-            self.progress_bar1.setValue(vals[0])
-            self.progress_bar2.setValue(vals[1])
-            self.progress_bar3.setValue(vals[2])
+            self.progress_bar1.setValue(int(vals[2]*10))
+            self.progress_bar2.setValue(int(vals[1]*10))
+            self.progress_bar3.setValue(int(vals[0]*10))
 
             # Näita progressbare pärast töötlemist
             self.progress_bar1.show()
